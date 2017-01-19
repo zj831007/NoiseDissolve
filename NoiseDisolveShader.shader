@@ -2,6 +2,7 @@
 	Properties {
 		_Color ("Color", Color) = (1,1,1,1)
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
+		_NoiseTex("Noise Tex",2D) = "white" {}
 		_DissolvePoint("Dissolve point", Vector) = (0,0,0,0)
 		_DissolveAmount("Disolve amount", Range(0,2)) = 1
 		_MaxDistance("Max distance", float) = 1
@@ -25,7 +26,7 @@
             Tags {
                 "LightMode"="ForwardBase"
             }
-            Cull Off
+            Cull back
 
             CGPROGRAM
             #pragma vertex vert
@@ -41,6 +42,8 @@
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+            sampler2D _NoiseTex;
+
 			fixed4 _Color;
 			fixed _NoiseFreq;
 			fixed _Border;
@@ -100,7 +103,12 @@
 
 					// get noise by world position, snoise return -1~1
 					// make the noise 0~1
-					float ns = snoise(i.worldPos * _NoiseFreq) / 2 + 0.5f;
+					//for pc
+//					float ns = snoise(i.worldPos * _NoiseFreq) / 2 + 0.5f;
+
+					//for mobile
+					float4 worldPosNoise =  i.worldPos * _NoiseFreq;
+					float ns = tex2D(_NoiseTex, float2(worldPosNoise.x, worldPosNoise.y)).r;
 
 					if (ns + _Border < finalValue) {
 						discard;
